@@ -1,0 +1,11 @@
+services:
+  osrm:
+    build:
+      context: .
+      dockerfile: Dockerfile.osrm
+    command: osrm-routed --algorithm mld /data/india-hgv.osrm
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/data
+    restart: unless-stopped

@@ -1,0 +1,15 @@
+# Non-secret application defaults. Credentials and service URLs are read from the root .env.
+app:
+  title: OptiFreight AI — Intelligent Freight Optimization
+  version: "1.0.0"
+  environment: development
+routing:
+  provider: osrm
+  local_url: http://localhost:5000
+  public_demo_fallback: https://router.project-osrm.org
+  route_tolerance_km: 0.5
+matching:
+  off_route_excursion_cap_km: 40.0
+  bundle_pickup_radius_km: 5.0
+  bundle_drop_radius_km: 5.0
+  config_version: 1

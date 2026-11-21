@@ -1,0 +1,103 @@
+IMPORTANT UPDATE (2026-11-21): This file is historical context. The root `.env` is the only authoritative local secret file in the current working package. Do not create or require `backend/.env`. `config/default.yaml` contains non-secret defaults only. Verify every integration against the actual code and current environment before relying on historical status claims.
+
+OPTIFREIGHT AI — PRIVATE CONFIGURATION & INTEGRATION INVENTORY
+================================================================
+Generated: 2026-11-20
+Location: C:\Users\Aaryan Rawal\.gemini\antigravity\scratch\OptiFreight_AI\OptiFreight AI\HANDOVER_PRIVATE_CONFIG.txt
+Security Note: This document does NOT contain raw secret values. It documents variable names, storage locations, provenance, and verification states.
+
+--------------------------------------------------------------------------------
+1. PostgreSQL Database & PostGIS
+--------------------------------------------------------------------------------
+• Service Name: PostgreSQL Relational Database (with PostGIS spatial extension)
+• Purpose: Persistent storage for User accounts, Truck profiles, Cargo listings, Routes, Jobs, Trip Plans, Match Runs, Decision Records, and Shipments.
+• Expected Environment Variables:
+  - DATABASE_URL (Format: postgresql+asyncpg://<username>:<password>@<host>:<port>/<dbname>)
+  - POSTGRES_USER
+  - POSTGRES_PASSWORD
+  - POSTGRES_DB
+• Configuration Storage Locations:
+  - root `.env` (Line 4: DATABASE_URL)
+  - root `.env` (authoritative DATABASE_URL; do not copy credentials into YAML)
+  - .env (Root template)
+• Credential Status: Configured and recovered from user input.
+  - Username: optifreight
+  - Password: Stored only in the user-managed root `.env`; never reproduce it in documentation or YAML.
+  - Database Name: optifreight
+  - Host/Port: localhost:5432
+• Local Service Status: PostgreSQL 18 binary directory located at "C:\Program Files\PostgreSQL\18". Service is currently stopped / port 5432 not responding.
+• Current Code Status: `backend/app/db.py` normalizes PostgreSQL URLs to asyncpg for the async application engine. Actual connectivity remains unverified in this workspace.
+
+--------------------------------------------------------------------------------
+2. UNCTADstat OData Freight Cost Integration
+--------------------------------------------------------------------------------
+• Service Name: UNCTADstat Data Centre — Transport Costs API
+• Purpose: Ingestion of international freight cost benchmarks (Trade and transport: By destination, mode, and product group — annual analytical report).
+• Endpoint & Protocol:
+  - Method: HTTP POST/GET (OData Facts endpoint)
+  - Base URL: https://unctadstat-user-api.unctad.org/US.TransportCosts/cur/Facts?culture=en
+  - Format: CSV compressed via gzip ($format=csv, compress=gz)
+  - OData Filters: TransportMode/Code eq '00', Origin/Code eq '0000', Product/Code eq 'TOTAL', specific destination country codes, Years (2016-2021).
+• Required Request Headers:
+  - "ClientId": <UNCTAD_CLIENT_ID>
+  - "ClientSecret": <UNCTAD_CLIENT_SECRET>
+• Environment Variables:
+  - UNCTAD_CLIENT_ID (or ClientId)
+  - UNCTAD_CLIENT_SECRET (or ClientSecret)
+• Configuration Storage Locations:
+  - root `.env` (Lines 1-2)
+  - root `.env` (UNCTAD_CLIENT_ID / UNCTAD_CLIENT_SECRET)
+• Credential Status: Environment variable names are documented; current credential validity and endpoint access are unverified. Do not assume credentials are active.
+• Current Implementation State: The former placeholder endpoint calls have been disabled. Implement only after the verified OData request/response contract and field mapping are available.
+
+--------------------------------------------------------------------------------
+3. Open Source Routing Machine (OSRM)
+--------------------------------------------------------------------------------
+• Service Name: Project OSRM Routing Engine
+• Purpose: Road-network routing, exact distance matrix calculations, driving duration, polyline geometries, and 40 km excursion checks.
+• Endpoint:
+  - Configurable via OSRM_URL
+  - Local Dev / Docker target: http://localhost:5000 (defined in routing/docker-compose.osrm.yml)
+  - Public Demo Fallback: https://router.project-osrm.org
+• Authentication: None required.
+• Configuration Storage Locations:
+  - .env (Root template: OSRM_URL=)
+  - backend/app/config.py (needs OSRM_URL field added)
+• Current Implementation State: An OSRM adapter now tries the configured local OSRM URL first and the configured public demo fallback second. If both fail, route eligibility remains unknown. Live service verification is pending.
+
+--------------------------------------------------------------------------------
+4. JWT Authentication & Password Security
+--------------------------------------------------------------------------------
+• Service Name: JSON Web Token (JWT) & Argon2 Password Hashing
+• Purpose: Secure user registration, login, role authorization, and session tokens.
+• Expected Environment Variables:
+  - JWT_SECRET_KEY (or JWT_SECRET)
+  - ACCESS_TOKEN_EXPIRE_MINUTES (Default: 60)
+  - ALGORITHM (HS256)
+• Configuration Storage Locations:
+  - root `.env` (Line 3: JWT_SECRET_KEY)
+  - root `.env` (JWT_SECRET_KEY / JWT_SECRET)
+• Credential Status: JWT variables are present in the root `.env`, but the currently selected signing secret is shorter than the 32-character minimum enforced by the new code. The user must rotate it manually; this build does not modify `.env`.
+• Current Implementation State:
+  - Argon2 password hashing and PyJWT token creation/verification are implemented in backend/app/authentication/security.py. HTTP and database verification remain pending.
+
+--------------------------------------------------------------------------------
+5. Google Maps Embed API (Optional Minimap)
+--------------------------------------------------------------------------------
+• Service Name: Google Maps Embed API
+• Purpose: Optional mini-map display on shipment/route review page. Decision D-030 establishes Leaflet as primary; Google Maps is optional and added last.
+• Environment Variable:
+  - GOOGLE_MAPS_EMBED_KEY
+• Configuration Storage Locations:
+  - .env (Root template)
+• Credential Status: None supplied (optional; application operates fully with Leaflet/OpenStreetMap).
+
+--------------------------------------------------------------------------------
+6. Machine Learning Model Artifacts
+--------------------------------------------------------------------------------
+• Components: Model A (LambdaRank cargo ranker), Model B (Quantile delay/risk), Model C (Price acceptance)
+• Configured Paths:
+  - models/model_a.txt
+  - models/model_b.txt
+  - models/model_c.txt (configured in config/default.yaml)
+• Model Artifact Status: No pre-trained weights exist yet. Wrappers must use deterministic baselines (clearly flagged) until trained on ingested datasets.

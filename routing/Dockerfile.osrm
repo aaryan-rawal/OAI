@@ -1,0 +1,2 @@
+FROM ghcr.io/project-osrm/osrm-backend:v5.27.1
+COPY profiles/hgv.lua /opt/hgv.lua
