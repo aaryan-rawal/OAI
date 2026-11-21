@@ -1,0 +1,7 @@
+@media print {
+  .header, .demo-strip, .no-print, .skip-link { display: none !important; }
+  body { background: #fff; color: #000; }
+  .main { max-width: none; padding: 0; }
+  .card { box-shadow: none; border: 1px solid #999; break-inside: avoid; }
+  a { color: #000; }
+}
