@@ -1,0 +1,4 @@
+# Optional local OCR stack (install separately; Paddle dependencies are large).
+paddleocr>=2.7.0
+paddlepaddle>=2.6.0
+pypdfium2>=4.30.0
